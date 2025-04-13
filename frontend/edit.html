@@ -67,11 +67,19 @@
 
         playerSelect.addEventListener("change", (e) => {
             if (playerSelect.value == -1) {
+                inputNick.disabled = true;
+                inputEmail.disabled = true;
+                inputLevel.disabled = true; 
+
+                inputNick.value = "";
+                inputEmail.value = "";
+                inputLevel.value = "";
                 return;
             }
 
-            selectedPlayer = playersArray[playerSelect.value - 1];
-            
+            //selectedPlayer = playersArray[playerSelect.value - 1];
+            selectedPlayer = playersArray.find((p) => p.id == playerSelect.value)
+
             inputNick.value = selectedPlayer.nick;
             inputEmail.value = selectedPlayer.email;
             inputLevel.value = selectedPlayer.poziom;
