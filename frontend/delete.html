@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Usuń element</title>
+</head>
+<body>
+    <h1>Usuń element</h1>
+    <form id="playerForm">
+        <label for="item">Wybierz gracza do usunięcia</label><br>
+        Wybrany gracz:<select id="playerSelect"></select>
+        <button type="submit">Usuń</button>
+
+        <a href="index.html">Powrót do menu</a>
+        <p id="state"></p>
+    </form>
+    <script>
+        const playerSelect = document.getElementById("playerSelect");
+        const form = document.getElementById("playerForm");
+        const state = document.getElementById("state");
+
+        async function reloadPlayers() {
+            const res = await fetch("http://localhost:4001/getPlayers");
+            const players = await res.json();
+            
+            playerSelect.innerHTML = "";
+
+            const emptyOption = document.createElement("option");
+            emptyOption.value = -1;
+            emptyOption.textContent = "-- wybierz gracza --";
+            emptyOption.selected = true;
+            playerSelect.appendChild(emptyOption);
+
+
+            for (let i = 0; i < players.length; i++) {
+                var player = players[i];
+                var option = document.createElement("option");
+                option.value = player.id;
+                option.className = "opt"
+                option.innerText = player.nick + " - " + player.email;
+
+                playerSelect.appendChild(option);
+            }
+        }
+
+        reloadPlayers();
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (playerSelect.value == -1) {
+                state.innerText = "Wybierz gracza"
+                return;
+            }
+
+            const formData = {
+                id: playerSelect.value,
+            };
+
+            const res = await fetch("http://localhost:4001/deletePlayer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                state.innerText = "Usunięto gracza";
+                reloadPlayers();
+            }else {
+                state.innerText = "Błąd bazy danych";
+            }
+            
+        });
+    </script>
+</body>
+</html>

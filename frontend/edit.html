@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Edytuj Gracza</title>
+</head>
+<body>
+    <h1>Edytuj Gracza</h1>
+    <form id="playerForm">
+        <label for="playerSelect">Wybierz gracza do edycji</label></br>
+        <select id="playerSelect"></select>
+
+
+        <label for="playerName">Nick</label><br>
+        <input type="text" id="playerNick" placeholder="Wpisz imię gracza" disabled required><br>
+
+        <label for="playerEmail">Email</label><br>
+        <input type="text" id="playerEmail" placeholder="Wpisz email gracza" disabled required><br>
+
+        <label for="playerLevel">Poziom</label><br>
+        <input type="number" min="1" id="playerLevel" placeholder="Podaj poziom gracza" disabled required><br>
+
+        <button type="submit">Zapisz</button>
+        <button type="reset">Wyczyść</button>
+        <p id="state"></p>
+        <a href="index.html">Powrót do menu</a>
+    </form>
+    <script>
+        const playerSelect = document.getElementById("playerSelect");
+        const form = document.getElementById("playerForm");
+        const state = document.getElementById("state");
+
+        const inputNick = document.getElementById("playerNick");
+        const inputEmail = document.getElementById("playerEmail");
+        const inputLevel = document.getElementById("playerLevel");
+
+        var selectedPlayer = {};
+        var playersArray;
+
+        async function reloadPlayers() {
+            const res = await fetch("http://localhost:4001/getPlayers");
+            const players = await res.json();
+
+            playerSelect.innerHTML = "";
+
+            const emptyOption = document.createElement("option");
+            emptyOption.value = -1;
+            emptyOption.textContent = "-- wybierz gracza --";
+            emptyOption.selected = true;
+            playerSelect.appendChild(emptyOption);
+
+            for (let i = 0; i < players.length; i++) {
+                var player = players[i];
+                var option = document.createElement("option");
+                option.value = player.id;
+                option.className = "opt"
+                option.innerText = player.nick + " - " + player.email;
+
+                playerSelect.appendChild(option);
+            }
+
+            playersArray = players;
+
+        }
+
+        playerSelect.addEventListener("change", (e) => {
+            if (playerSelect.value == -1) {
+                return;
+            }
+
+            selectedPlayer = playersArray[playerSelect.value - 1];
+            
+            inputNick.value = selectedPlayer.nick;
+            inputEmail.value = selectedPlayer.email;
+            inputLevel.value = selectedPlayer.poziom;
+
+            inputNick.disabled = false;
+            inputEmail.disabled = false;
+            inputLevel.disabled = false; 
+        });
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (playerSelect.value == -1) {
+                state.innerText = "Wybierz gracza"
+                return;
+            }
+
+            const formData = {
+                id: selectedPlayer.id,
+                nick: inputNick.value,
+                email: inputEmail.value,
+                poziom: inputLevel.value,
+            };
+
+            const res = await fetch("http://localhost:4001/updatePlayer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                state.innerText = "Zmieniono dane";
+                reloadPlayers();
+
+                inputNick.disabled = true;
+                inputEmail.disabled = true;
+                inputLevel.disabled = true; 
+
+                inputNick.value = "";
+                inputEmail.value = "";
+                inputLevel.value = "";
+
+            }else {
+                state.innerText = "Błąd bazy danych";
+            }
+            
+        });
+
+        reloadPlayers();
+    </script>
+</body>
+</html>

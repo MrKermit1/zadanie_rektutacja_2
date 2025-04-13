@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Panel Komunikacji</title>
+</head>
+<body>
+    <h1>CRUD Menu</h1>
+    <div id="menu">
+        <a href="create.html">Utwórz gracza</a>
+        <a href="delete.html">Usuń gracza</a>
+        <a href="edit.html">Edytuj gracza</a>
+    </div>
+    <div id="playersData">
+        
+    </div>
+    <script>
+        const playersData = document.getElementById("playerData");
+        var players = new Array(0);
+
+        function renderTable(players) {
+            const playersData = document.getElementById("playersData");
+            playersData.innerHTML = ""; // wyczyść przed renderowaniem
+
+            if (players.length === 0) {
+                playersData.innerText = "Brak graczy do wyświetlenia.";
+                return;
+            }
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+
+            const headerRow = document.createElement("tr");
+
+            const headers = ["ID", "Nick", "Email", "Poziom"];
+            headers.forEach(headerText => {
+                const th = document.createElement("th");
+                th.innerText = headerText;
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement("tbody");
+
+            players.forEach(player => {
+                const row = document.createElement("tr");
+
+                const idCell = document.createElement("td");
+                idCell.innerText = player.id;
+
+                const nickCell = document.createElement("td");
+                nickCell.innerText = player.nick;
+
+                const emailCell = document.createElement("td");
+                emailCell.innerText = player.email;
+
+                const levelCell = document.createElement("td");
+                levelCell.innerText = player.poziom;
+
+                row.appendChild(idCell);
+                row.appendChild(nickCell);
+                row.appendChild(emailCell);
+                row.appendChild(levelCell);
+
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(tbody);
+            playersData.appendChild(table);
+        }   
+
+
+        async function loadPlayers() {
+            const res = await fetch("http://localhost:4001/getPlayers");
+
+            if (res.ok) {
+                players = await res.json();
+                renderTable(players);
+            }else {
+                playersData.innerText = "Błąd ładowania danych.";
+            }
+        }
+
+        loadPlayers();
+    </script>
+</body>
+</html>

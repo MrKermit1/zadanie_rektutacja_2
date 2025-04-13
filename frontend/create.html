@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Utwórz Gracza</title>
+</head>
+<body>
+    <h1>Utwórz gracza</h1>
+    <form id="playerForm">
+        <label for="name">Nick</label><br>
+        <input type="text" id="name" placeholder="Podaj nick gracza" required><br>
+
+        <label for="email">Email</label><br>
+        <input type="text" id="email" placeholder="Podaj email gracza" required><br>
+
+        <label for="age">Poziom</label><br>
+        <input type="number" min="1" id="level" placeholder="Podaj poziom gracza" required><br>
+
+        <button type="submit" id="submitButton">Utwórz</button>
+        <p id="state"></p>
+
+        <a href="index.html">Powrót do menu</a>
+    </form>
+
+    <script>
+        const form = document.getElementById("playerForm");
+        const state = document.getElementById("state");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                nick: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                poziom: document.getElementById("level").value,
+            };
+
+            const res = await fetch("http://localhost:4001/createPlayer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                state.innerText = "Dodano gracza";
+            }else {
+                state.innerText = text;
+            }
+        });
+
+    </script>
+
+</body>
+</html>
